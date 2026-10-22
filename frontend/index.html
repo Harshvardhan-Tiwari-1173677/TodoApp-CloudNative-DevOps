@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f4f6f8;
+        }
+        h1 { color: #243b53; }
+        .task-form { display: flex; gap: 10px; }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add { background: #176b45; color: white; }
+        .delete { background: #b42318; color: white; }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        #message { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>My To-Do App</h1>
+    <p>Add and manage your tasks.</p>
+
+    <form id="task-form" class="task-form">
+        <input id="task-title" type="text"
+               placeholder="Enter a task" required>
+        <button class="add" type="submit">Add Task</button>
+    </form>
+
+    <p id="message" role="status"></p>
+    <ul id="task-list"></ul>
+
+    <script>
+        const API_URL = "/api";
+
+        async function loadTasks() {
+            const response = await fetch(`${API_URL}/tasks`);
+
+            if (!response.ok) {
+                throw new Error("Unable to load tasks.");
+            }
+
+            const tasks = await response.json();
+            const list = document.getElementById("task-list");
+            list.replaceChildren();
+
+            tasks.forEach(task => {
+                const item = document.createElement("li");
+                const title = document.createElement("span");
+                const button = document.createElement("button");
+
+                title.textContent = task.title;
+                button.textContent = "Delete";
+                button.className = "delete";
+                button.onclick = async () => {
+                    const result = await fetch(
+                        `${API_URL}/tasks/${task.id}`,
+                        { method: "DELETE" }
+                    );
+
+                    if (result.ok) {
+                        await loadTasks();
+                    } else {
+                        showMessage("Unable to delete task.");
+                    }
+                };
+
+                item.append(title, button);
+                list.appendChild(item);
+            });
+        }
+
+        function showMessage(message) {
+            document.getElementById("message").textContent = message;
+        }
+
+        document.getElementById("task-form").onsubmit = async event => {
+            event.preventDefault();
+
+            const input = document.getElementById("task-title");
+            const title = input.value.trim();
+
+            if (!title) return;
+
+            try {
+                const response = await fetch(`${API_URL}/tasks`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Unable to add task.");
+                }
+
+                input.value = "";
+                showMessage("Task added successfully.");
+                await loadTasks();
+            } catch (error) {
+                showMessage(error.message);
+            }
+        };
+
+        loadTasks().catch(error => showMessage(error.message));
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+
+# Assessment evidence and local AWS audit
+Assessment-1 Evidences.docx
+aws-resource-audit.csv
+
+# Assessment evidence and local audit
+Assessment-1 Evidences.docx
+aws-resource-audit.csv
+
+# Backup and review files
+*.bak
+*.before-dependency-edit.bak
+cloudformation/change-set-review.json
+~$*
