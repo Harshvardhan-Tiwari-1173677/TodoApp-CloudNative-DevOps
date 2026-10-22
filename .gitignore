@@ -20,3 +20,5 @@ aws-resource-audit.csv
 *.before-dependency-edit.bak
 cloudformation/change-set-review.json
 ~$*
+
+token.txt
